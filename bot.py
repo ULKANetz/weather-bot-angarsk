@@ -42,7 +42,6 @@ def get_weather():
     
     # ИСПОЛЬЗУЕМ HTML (теги <b>) И ДОБАВЛЯЕМ ЯРКУЮ МЕТКУ
     message = (
-        f"🚨 <b>ЭТО НОВАЯ ВЕРСИЯ 2.0</b> 🚨\n\n"
         f"🌤 <b>Погода в Ангарске</b>\n\n"
         f"🌡 <b>Сейчас:</b> {current['temperature']}°C, {desc_now}\n"
         f"💨 <b>Ветер:</b> {current['windspeed']} км/ч\n\n"
