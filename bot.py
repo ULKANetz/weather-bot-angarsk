@@ -7,7 +7,6 @@ LAT = 52.557085
 LON = 103.888251
 
 def get_weather():
-    # Добавили параметр hourly=temperature_2m,weathercode для почасового прогноза
     url = f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}&current_weather=true&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia/Irkutsk"
     response = requests.get(url).json()
     
@@ -27,41 +26,37 @@ def get_weather():
     
     desc_now = weather_codes.get(current['weathercode'], "Неизвестно 🌡")
     
-    # Формируем почасовой прогноз на ключевые часы дня
     target_hours = ["T09:00", "T12:00", "T15:00", "T18:00", "T21:00"]
     hourly_forecast = []
     
     for t in target_hours:
-        # Ищем индекс нужного часа в массиве данных (например, "2023-10-27T09:00")
         idx = next((i for i, time_str in enumerate(hourly['time']) if t in time_str), None)
         if idx is not None:
             temp = hourly['temperature_2m'][idx]
             code = hourly['weathercode'][idx]
             desc = weather_codes.get(code, "Неизвестно 🌡")
-            hour_str = t.replace("T", "") # Превращаем "T09:00" в "09:00"
+            hour_str = t.replace("T", "")
             hourly_forecast.append(f"   🕒 {hour_str} — {temp}°C, {desc}")
             
     hourly_text = "\n".join(hourly_forecast)
     
-    # Собираем итоговое сообщение
+    # ИСПОЛЬЗУЕМ HTML (теги <b>) И ДОБАВЛЯЕМ ЯРКУЮ МЕТКУ
     message = (
-        f"🌤 *Погода в Ангарске*\n\n"
-        f"🌡 *Сейчас:* {current['temperature']}°C, {desc_now}\n"
-        f"💨 *Ветер:* {current['windspeed']} км/ч\n\n"
-        f"📊 *Прогноз на день:*\n{hourly_text}\n\n"
-        f"📈 *Днем до:* {daily['temperature_2m_max'][0]}°C\n"
-        f"📉 *Ночью до:* {daily['temperature_2m_min'][0]}°C"
+        f"🚨 <b>ЭТО НОВАЯ ВЕРСИЯ 2.0</b> 🚨\n\n"
+        f"🌤 <b>Погода в Ангарске</b>\n\n"
+        f"🌡 <b>Сейчас:</b> {current['temperature']}°C, {desc_now}\n"
+        f"💨 <b>Ветер:</b> {current['windspeed']} км/ч\n\n"
+        f"📊 <b>Прогноз на день:</b>\n{hourly_text}\n\n"
+        f"📈 <b>Днем до:</b> {daily['temperature_2m_max'][0]}°C\n"
+        f"📉 <b>Ночью до:</b> {daily['temperature_2m_min'][0]}°C"
     )
     return message
 
 if __name__ == "__main__":
     message = get_weather()
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    params = {
-        "chat_id": CHAT_ID, 
-        "text": message, 
-        "parse_mode": "Markdown"
-    }
+    # ЗДЕСЬ МЫ МЕНЯЕМ MARKDOWN НА HTML
+    params = {"chat_id": CHAT_ID, "text": message, "parse_mode": "HTML"}
     
     response = requests.post(url, json=params)
     print("Результат отправки:", response.json())
